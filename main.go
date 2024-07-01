@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
+	"golang-lsp/compiler"
 	"golang-lsp/lsp"
 	"golang-lsp/rpc"
 	"log"
@@ -14,6 +15,8 @@ func main() {
 	logger := getLogger("/home/drama321/coding/golang-lsp/log.txt")
 	logger.Println("Hey, I started!")
 
+	state := compiler.NewState()
+
 	scanner := bufio.NewScanner(os.Stdin) // read from stdin
 	scanner.Split(rpc.Split)
 	for scanner.Scan() { // scan till you can't no more
@@ -22,13 +25,13 @@ func main() {
 		if err != nil {
 			logger.Printf("Got an error: %s", err)
 		}
-		handleMessage(logger, method, contents)
+		handleMessage(logger, state, method, contents)
 
 	}
 	fmt.Println("hello world!")
 }
 
-func handleMessage(logger *log.Logger, method string, contents []byte) {
+func handleMessage(logger *log.Logger, state compiler.State, method string, contents []byte) {
 	logger.Printf("Recievied msg with method: %s", method)
 	switch method {
 	case "initialize":
@@ -42,6 +45,24 @@ func handleMessage(logger *log.Logger, method string, contents []byte) {
 		writer := os.Stdout
 		writer.Write([]byte(reply))
 		logger.Println("Sent the reply Response")
+	case "textDocument/didOpen":
+		var request lsp.DidOpenTextDocumentNotification
+		if err := json.Unmarshal(contents, &request); err != nil {
+			logger.Printf("textDocument/didOpen: %s", err)
+			return
+		}
+		logger.Printf("Opened: %s", request.Params.TextDocument.URI)
+		state.OpenDocument(request.Params.TextDocument.URI, request.Params.TextDocument.Text)
+	case "textDocument/didChange":
+		var request lsp.DidChangeTextDocumentNotification
+		if err := json.Unmarshal(contents, &request); err != nil {
+			logger.Printf("textDocument/didChange: %s", err)
+			return
+		}
+		logger.Printf("Changed: %s", request.Params.TextDocumentItem.URI)
+		for _, change := range request.Params.ContentChanges {
+			state.UpdateDocument(request.Params.TextDocumentItem.URI, change.Text)
+		}
 	}
 }
 

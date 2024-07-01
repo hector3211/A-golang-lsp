@@ -22,11 +22,13 @@ type InitializeResponse struct {
 }
 
 type InitializeResult struct {
-	Capabilities SeverCapabilites `json:"Capabilities"`
+	Capabilities SeverCapabilites `json:"capabilities"`
 	ServerInfo   ServerInfo       `json:"serverInfo"`
 }
 
 type SeverCapabilites struct {
+	TextDocumentSync int  `json:"textDocumentSync"`
+	HoverProvider    bool `json:"hoverProvider"`
 }
 
 type ServerInfo struct {
@@ -41,7 +43,10 @@ func NewInitializeResponse(id int) InitializeResponse {
 			ID:  &id,
 		},
 		Result: InitializeResult{
-			Capabilities: SeverCapabilites{},
+			Capabilities: SeverCapabilites{
+				TextDocumentSync: 1,
+				HoverProvider:    true,
+			},
 			ServerInfo: ServerInfo{
 				Name:    "educationallsp",
 				Version: "0.0.0.0-beta1.final",
