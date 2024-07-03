@@ -7,7 +7,6 @@ type InitializeRequest struct {
 
 type InitializeRequestParams struct {
 	ClientInfo *ClientInfo `json:"clientInfo"`
-
 	// Tons more for a proper lsp
 }
 
@@ -27,8 +26,10 @@ type InitializeResult struct {
 }
 
 type SeverCapabilites struct {
-	TextDocumentSync int  `json:"textDocumentSync"`
-	HoverProvider    bool `json:"hoverProvider"`
+	TextDocumentSync   int  `json:"textDocumentSync"`
+	HoverProvider      bool `json:"hoverProvider"`
+	DefinitionProvider bool `json:"definitionProvider"`
+	CodeActionProvider bool `json:"codeActionProvider"`
 }
 
 type ServerInfo struct {
@@ -44,8 +45,10 @@ func NewInitializeResponse(id int) InitializeResponse {
 		},
 		Result: InitializeResult{
 			Capabilities: SeverCapabilites{
-				TextDocumentSync: 1,
-				HoverProvider:    true,
+				TextDocumentSync:   1,
+				HoverProvider:      true,
+				DefinitionProvider: true,
+				CodeActionProvider: true,
 			},
 			ServerInfo: ServerInfo{
 				Name:    "educationallsp",

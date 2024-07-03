@@ -7,6 +7,7 @@ import (
 	"golang-lsp/compiler"
 	"golang-lsp/lsp"
 	"golang-lsp/rpc"
+	"io"
 	"log"
 	"os"
 )
@@ -14,6 +15,7 @@ import (
 func main() {
 	logger := getLogger("/home/drama321/coding/golang-lsp/log.txt")
 	logger.Println("Hey, I started!")
+	writer := os.Stdout
 
 	state := compiler.NewState()
 
@@ -25,13 +27,13 @@ func main() {
 		if err != nil {
 			logger.Printf("Got an error: %s", err)
 		}
-		handleMessage(logger, state, method, contents)
+		handleMessage(logger, writer, state, method, contents)
 
 	}
 	fmt.Println("hello world!")
 }
 
-func handleMessage(logger *log.Logger, state compiler.State, method string, contents []byte) {
+func handleMessage(logger *log.Logger, writer io.Writer, state compiler.State, method string, contents []byte) {
 	logger.Printf("Recievied msg with method: %s", method)
 	switch method {
 	case "initialize":
@@ -41,9 +43,7 @@ func handleMessage(logger *log.Logger, state compiler.State, method string, cont
 		}
 		logger.Printf("Connected to: %s %s", request.Params.ClientInfo.Name, request.Params.ClientInfo.Version)
 		msg := lsp.NewInitializeResponse(request.ID)
-		reply := rpc.EncodeMessage(msg)
-		writer := os.Stdout
-		writer.Write([]byte(reply))
+		writeResponse(writer, msg)
 		logger.Println("Sent the reply Response")
 	case "textDocument/didOpen":
 		var request lsp.DidOpenTextDocumentNotification
@@ -63,7 +63,45 @@ func handleMessage(logger *log.Logger, state compiler.State, method string, cont
 		for _, change := range request.Params.ContentChanges {
 			state.UpdateDocument(request.Params.TextDocumentItem.URI, change.Text)
 		}
+	case "textDocument/hover":
+		var request lsp.HoverRequest
+		if err := json.Unmarshal(contents, &request); err != nil {
+			logger.Printf("textDocument/hover: %s", err)
+			return
+		}
+
+		response := state.Hover(request.ID, request.Params.TextDocument.URI, request.Params.Position)
+
+		// Writer
+		writeResponse(writer, response)
+	case "textDocument/definition":
+		var request lsp.DefinitionRequest
+		if err := json.Unmarshal(contents, &request); err != nil {
+			logger.Printf("textDocument/definition: %s", err)
+			return
+		}
+
+		response := state.Definition(request.ID, request.Params.TextDocument.URI, request.Params.Position)
+
+		// Writer
+		writeResponse(writer, response)
+	case "textDocument/codeAction":
+		var request lsp.DefinitionRequest
+		if err := json.Unmarshal(contents, &request); err != nil {
+			logger.Printf("textDocument/codeAction: %s", err)
+			return
+		}
+
+		response := state.CodeAction(request.ID, request.Params.TextDocument.URI, request.Params.Position)
+
+		// Writer
+		writeResponse(writer, response)
 	}
+}
+
+func writeResponse(writer io.Writer, msg any) {
+	reply := rpc.EncodeMessage(msg)
+	writer.Write([]byte(reply))
 }
 
 func getLogger(fileName string) *log.Logger {
