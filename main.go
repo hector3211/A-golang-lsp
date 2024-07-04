@@ -14,7 +14,7 @@ import (
 
 func main() {
 	logger := getLogger("/home/drama321/coding/golang-lsp/log.txt")
-	logger.Println("Hey, I started!")
+	logger.Println("Lsp started!")
 	writer := os.Stdout
 
 	state := compiler.NewState()
@@ -86,13 +86,24 @@ func handleMessage(logger *log.Logger, writer io.Writer, state compiler.State, m
 		// Writer
 		writeResponse(writer, response)
 	case "textDocument/codeAction":
-		var request lsp.DefinitionRequest
+		var request lsp.CodeActionRequest
 		if err := json.Unmarshal(contents, &request); err != nil {
 			logger.Printf("textDocument/codeAction: %s", err)
 			return
 		}
 
-		response := state.CodeAction(request.ID, request.Params.TextDocument.URI, request.Params.Position)
+		response := state.CodeAction(request.ID, request.Params.TextDocument.URI, request.Params.Range.Start)
+
+		// Writer
+		writeResponse(writer, response)
+
+	case "textDocument/completion":
+		var request lsp.CompletionRequest
+		if err := json.Unmarshal(contents, &request); err != nil {
+			logger.Printf("textDocument/completion: %s", err)
+			return
+		}
+		response := state.CodeCompletion(request.ID, request.Params.TextDocument.URI)
 
 		// Writer
 		writeResponse(writer, response)

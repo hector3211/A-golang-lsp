@@ -60,3 +60,18 @@ type Range struct {
 	Start Position `json:"start"`
 	End   Position `json:"end"`
 }
+
+type WorkSpaceEdit struct {
+	Changes map[string][]TextEdit `json:"changes"`
+}
+
+type TextEdit struct {
+	Range   Range  `json:"range"`
+	NewText string `json:"newText"`
+}
+
+type Command struct {
+	Title     string        `json:"title"`
+	Command   string        `json:"command"`
+	Arguments []interface{} `json:"arguments,omitempty"`
+}

@@ -22,21 +22,6 @@ type CodeAction struct {
 	Command *Command       `json:"command,omitempty"`
 }
 
-type WorkSpaceEdit struct {
-	Changes map[string][]TextEdit `json:"changes"`
-}
-
-type TextEdit struct {
-	Range   Range  `json:"range"`
-	NewText string `json:"newText"`
-}
-
-type Command struct {
-	Title     string        `json:"title"`
-	Command   string        `json:"command"`
-	Arguments []interface{} `json:"arguments,omitempty"`
-}
-
 type CodeActionContext struct {
 	// Diagnostics []Diagnostic `json:"diagnostics"`
 	// Only        *[]string    `json:"only"`

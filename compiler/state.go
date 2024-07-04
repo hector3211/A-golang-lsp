@@ -111,3 +111,21 @@ func lineRange(line, start, end int) lsp.Range {
 		},
 	}
 }
+
+func (s *State) CodeCompletion(id int, uri string) lsp.CompletionResponse {
+	completions := []lsp.CompletionItem{
+		{
+			Label:         "Nvim (FTW)",
+			Detail:        "Fastest editor out there",
+			Documentation: "Longer version of detail here.",
+		},
+	}
+
+	return lsp.CompletionResponse{
+		Response: lsp.Response{
+			RPC: "2.0",
+			ID:  &id,
+		},
+		Result: completions,
+	}
+}
