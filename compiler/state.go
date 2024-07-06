@@ -14,12 +14,33 @@ func NewState() State {
 	return State{Documents: map[string]string{}}
 }
 
-func (s *State) OpenDocument(uri, text string) {
-	s.Documents[uri] = text
+func PublishDiagnostic(text string) []lsp.Diagnostic {
+	document := text
+	diagnostics := []lsp.Diagnostic{}
+	for row, line := range strings.Split(document, "\n") {
+		hasSemiColon := strings.Contains(line, ";")
+		if !hasSemiColon {
+			idx := strings.Index(line, ";")
+			diagnostics = append(diagnostics, lsp.Diagnostic{
+				Rang:     lineRange(row, idx, idx+len(";")),
+				Severity: 2,
+				Source:   "",
+				Message:  "Forgot to add semicolon!",
+			})
+		}
+	}
+
+	return diagnostics
 }
 
-func (s *State) UpdateDocument(uri, text string) {
+func (s *State) OpenDocument(uri, text string) []lsp.Diagnostic {
 	s.Documents[uri] = text
+	return PublishDiagnostic(text)
+}
+
+func (s *State) UpdateDocument(uri, text string) []lsp.Diagnostic {
+	s.Documents[uri] = text
+	return PublishDiagnostic(text)
 }
 
 func (s *State) Hover(id int, uri string, position lsp.Position) lsp.HoverResponse {
