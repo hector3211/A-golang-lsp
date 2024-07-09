@@ -70,6 +70,7 @@ func handleMessage(logger *log.Logger, writer io.Writer, state compiler.State, m
 			return
 		}
 		logger.Printf("Changed: %s", request.Params.TextDocumentItem.URI)
+
 		for _, change := range request.Params.ContentChanges {
 			diagnostics := state.UpdateDocument(request.Params.TextDocumentItem.URI, change.Text)
 			writeResponse(writer, lsp.PublishDiagnosticsNotification{
@@ -91,7 +92,6 @@ func handleMessage(logger *log.Logger, writer io.Writer, state compiler.State, m
 		}
 
 		response := state.Hover(request.ID, request.Params.TextDocument.URI, request.Params.Position)
-
 		// Writer
 		writeResponse(writer, response)
 	case "textDocument/definition":
@@ -102,7 +102,6 @@ func handleMessage(logger *log.Logger, writer io.Writer, state compiler.State, m
 		}
 
 		response := state.Definition(request.ID, request.Params.TextDocument.URI, request.Params.Position)
-
 		// Writer
 		writeResponse(writer, response)
 	case "textDocument/codeAction":
@@ -113,7 +112,6 @@ func handleMessage(logger *log.Logger, writer io.Writer, state compiler.State, m
 		}
 
 		response := state.CodeAction(request.ID, request.Params.TextDocument.URI, request.Params.Range.Start)
-
 		// Writer
 		writeResponse(writer, response)
 
@@ -124,7 +122,6 @@ func handleMessage(logger *log.Logger, writer io.Writer, state compiler.State, m
 			return
 		}
 		response := state.CodeCompletion(request.ID, request.Params.TextDocument.URI)
-
 		// Writer
 		writeResponse(writer, response)
 	}

@@ -23,8 +23,7 @@ func PublishDiagnostic(text string) []lsp.Diagnostic {
 			idx := strings.Index(line, ";")
 			diagnostics = append(diagnostics, lsp.Diagnostic{
 				Rang:     lineRange(row, idx, idx+len(";")),
-				Severity: 2,
-				Source:   "",
+				Severity: 1,
 				Message:  "Forgot to add semicolon!",
 			})
 		}
@@ -44,7 +43,6 @@ func (s *State) UpdateDocument(uri, text string) []lsp.Diagnostic {
 }
 
 func (s *State) Hover(id int, uri string, position lsp.Position) lsp.HoverResponse {
-
 	document := s.Documents[uri]
 
 	return lsp.HoverResponse{

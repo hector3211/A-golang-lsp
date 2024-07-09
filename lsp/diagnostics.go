@@ -11,8 +11,8 @@ type PublishDiagnosticsParams struct {
 }
 
 type Diagnostic struct {
-	Rang     Range  `json:"range"`
-	Severity int    `json:"severity"`
-	Source   string `json:"source"`
-	Message  string `json:"message"`
+	Rang     Range `json:"range"`
+	Severity int   `json:"severity"`
+	// Source   string `json:"source"`
+	Message string `json:"message"`
 }
